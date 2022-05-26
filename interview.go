@@ -12,6 +12,7 @@ import (
   "io"
   "log"
   "os"
+  "sort"
 )
 
 type Domain struct {
@@ -50,15 +51,26 @@ func AreHeadersValid(Header1 string, Header2 string, Header3 string, Header4 str
   }
 }
 
-func IncreaseCounter(EmailDomains []Domain, EmailDomainToIncrease string, Email string) (bool, []Domain) {
-  return true, []Domain{}
+func IncreaseCounter(EmailDomains []Domain, EmailDomainToIncrease string, Username string) (bool, []Domain) {
+  IncreasedCounter := false
+
+  for index := range EmailDomains {
+    if EmailDomains[index].Domain == EmailDomainToIncrease {
+      EmailDomains[index].Count = EmailDomains[index].Count + 1
+      EmailDomains[index].Emails = append(EmailDomains[index].Emails, Username)
+      IncreasedCounter = true
+      break
+    }
+  }
+
+  return IncreasedCounter, EmailDomains
 }
 
-func ParseExcelFile() (bool, []Domain) {
+func ParseExcelFile(File string) (bool, []Domain) {
   EmailDomains := []Domain{}
   HeaderValidated := false
 
-  f, err := os.Open("customers_test_1.csv")
+  f, err := os.Open(File)
 
   if err != nil {
       log.Fatal(err)
@@ -92,15 +104,7 @@ func ParseExcelFile() (bool, []Domain) {
       var is_valid_email, EmailDomain, username = GetEmailDomain(rec[2])
 
       if is_valid_email == true {
-        var IncreasedCounter = false
-
-        for index := range EmailDomains {
-          if EmailDomains[index].Domain == EmailDomain {
-            EmailDomains[index].Count = EmailDomains[index].Count + 1
-            EmailDomains[index].Emails = append(EmailDomains[index].Emails, username)
-            IncreasedCounter = true
-          }
-        }
+        IncreasedCounter, _ := IncreaseCounter(EmailDomains, EmailDomain, username)
 
         if IncreasedCounter == false {
           EmailDomainObj := Domain{Domain: EmailDomain, Count: 1, Emails: []string{username} }
@@ -128,11 +132,26 @@ func PrintResults(EmailsDomains []Domain) {
   }
 }
 
+func SortEmailDomains(EmailDomains []Domain) (bool, []Domain) {
+  SortedSuccess := true
+
+  sort.Slice(EmailDomains, func(i, j int) bool {
+    return EmailDomains[i].Count > EmailDomains[j].Count
+  })
+
+  return SortedSuccess, EmailDomains
+}
+
 func main() {
-    ParsedSuccess, EmailsDomains := ParseExcelFile();
+    ParsedSuccess, EmailsDomains := ParseExcelFile("customers_test_1.csv");
 
     if ParsedSuccess == true {
-      PrintResults(EmailsDomains)
+      Success, EmailsDomains := SortEmailDomains(EmailsDomains)
+
+      if Success {
+        PrintResults(EmailsDomains)
+      }
+
     } else {
       fmt.Printf("excel file parse failed")
     }
