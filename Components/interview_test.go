@@ -33,3 +33,33 @@ func TestGetEmailDomain(t *testing.T) {
       })
   }
 }
+
+
+
+
+
+
+
+
+func TestAreHeadersValid(t *testing.T) {
+  var tests = []struct {
+    Header1 string
+    Header2 string
+    Header3 string
+    Header4 string
+    want1 bool
+}{
+    {"first_name", "last_name", "email", "gender", true},
+    {"jakub.pronobis@@gmail.com", "true", "gmail.com", "jakub.pronobis@", false},
+}
+
+  for _, tt := range tests {
+      testname := fmt.Sprintf("%v,%v,%v,%v,%v", tt.Header1, tt.Header2, tt.Header3, tt.Header4, tt.want1)
+      t.Run(testname, func(t *testing.T) {
+          ans1 := AreHeadersValid(tt.Header1, tt.Header2, tt.Header3, tt.Header4)
+          if ans1 != tt.want1 {
+              t.Errorf("got %v, want %v", ans1, tt.want1)
+          }
+      })
+  }
+}
