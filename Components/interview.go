@@ -1,10 +1,5 @@
-// package customerimporter reads from the given customers.csv file and returns a
-// sorted (data structure of your choice) of email domains along with the number
-// of customers with e-mail addresses for each domain.  Any errors should be
-// logged (or handled). Performance matters (this is only ~3k lines, but *could*
-// be 1m lines or run on a small machine).
+package customerimporter
 
-package main
 import (
   "fmt"
   "strings"
@@ -116,6 +111,7 @@ func ParseExcelFile(File string) (bool, []Domain) {
       }
   }
 
+  EmailDomains = SortEmailDomains(EmailDomains)
   return true, EmailDomains
 }
 
@@ -132,27 +128,10 @@ func PrintResults(EmailsDomains []Domain) {
   }
 }
 
-func SortEmailDomains(EmailDomains []Domain) (bool, []Domain) {
-  SortedSuccess := true
-
+func SortEmailDomains(EmailDomains []Domain) ([]Domain) {
   sort.Slice(EmailDomains, func(i, j int) bool {
     return EmailDomains[i].Count > EmailDomains[j].Count
   })
 
-  return SortedSuccess, EmailDomains
-}
-
-func main() {
-    ParsedSuccess, EmailsDomains := ParseExcelFile("customers_test_1.csv");
-
-    if ParsedSuccess == true {
-      Success, EmailsDomains := SortEmailDomains(EmailsDomains)
-
-      if Success {
-        PrintResults(EmailsDomains)
-      }
-
-    } else {
-      fmt.Printf("excel file parse failed")
-    }
+  return EmailDomains
 }
