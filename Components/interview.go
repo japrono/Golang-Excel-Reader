@@ -105,8 +105,10 @@ func ParseExcelFile(File string) (bool, []Domain) {
           EmailDomainObj := Domain{Domain: EmailDomain, Count: 1, Emails: []string{username} }
           EmailDomains = append(EmailDomains, EmailDomainObj)
         }
+
       } else {
         fmt.Printf("Warning: This email address is not valid: %v", rec[2])
+        fmt.Printf("\n\tFull details [first_name, last_name, email, gender, ip_address] %v %v %v %v %v", rec[0], rec[1], rec[2], rec[3], rec[4])
         fmt.Printf("\n")
       }
   }
@@ -116,16 +118,39 @@ func ParseExcelFile(File string) (bool, []Domain) {
 }
 
 func PrintResults(EmailsDomains []Domain) {
-  for index := range EmailsDomains {
-      fmt.Printf("%v %v", EmailsDomains[index].Count, EmailsDomains[index].Domain)
-      fmt.Printf("\n")
+  f, err := os.Create("results.txt")
 
-      for index2 := range EmailsDomains[index].Emails {
-        fmt.Printf("\t %v", EmailsDomains[index].Emails[index2])
+  if err != nil {
+      log.Fatal(err)
+  }
+
+  defer f.Close()
+
+  for index := range EmailsDomains {
+      string1 := fmt.Sprintf("%v %v \n", EmailsDomains[index].Count, EmailsDomains[index].Domain)
+      _, err2 := f.WriteString(string1)
+
+      if err2 != nil {
+        log.Fatal(err2)
       }
 
-      fmt.Printf("\n\n")
+      for index2 := range EmailsDomains[index].Emails {
+        string2 := fmt.Sprintf("\t %v", EmailsDomains[index].Emails[index2])
+
+        _, err3 := f.WriteString(string2)
+
+        if err3 != nil {
+          log.Fatal(err3)
+        }
+      }
+
+      _, err4 := f.WriteString("\n\n")
+      if err4 != nil {
+        log.Fatal(err4)
+      }
   }
+
+  fmt.Println("\n\nOutput saved to file results.txt")
 }
 
 func SortEmailDomains(EmailDomains []Domain) ([]Domain) {
